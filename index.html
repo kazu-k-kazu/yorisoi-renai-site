@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>性の悩み相談サイト（仮）</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --main: #4A5568;
+      --accent: #7C8CF8;
+      --accent2: #B794F4;
+      --sub: #718096;
+      --bg: #F0F4FF;
+      --white: #FFFFFF;
+      --text: #2D3748;
+      --text-light: #718096;
+      --border: #E2E8F0;
+    }
+
+    body {
+      font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ナビゲーション */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .logo {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--sub);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    .nav-cta {
+      background: var(--accent);
+      color: var(--white) !important;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* ヒーロー */
+    .hero {
+      background: linear-gradient(135deg, #EEF2FF 0%, #F3E8FF 50%, #E0E7FF 100%);
+      padding: 100px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 40%, rgba(124,140,248,0.12) 0%, transparent 60%);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(124,140,248,0.15);
+      border: 1px solid rgba(124,140,248,0.3);
+      color: var(--accent);
+      font-size: 13px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.08em;
+    }
+
+    .hero h1 {
+      color: var(--text);
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .hero h1 span {
+      color: var(--accent);
+    }
+
+    .hero p {
+      color: var(--sub);
+      font-size: 18px;
+      max-width: 560px;
+      margin: 0 auto 40px;
+      position: relative;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      position: relative;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--white);
+      padding: 14px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: opacity 0.2s, transform 0.2s;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--accent);
+      padding: 14px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      border: 1px solid var(--accent);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--accent);
+      color: var(--white);
+    }
+
+    /* 統計バー */
+    .stats-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex;
+      justify-content: center;
+      gap: 64px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    /* カテゴリセクション */
+    section {
+      padding: 64px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      margin-bottom: 40px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--main);
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .category-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .category-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(45,55,72,0.1);
+      border-color: var(--accent);
+    }
+
+    .category-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(102,126,234,0.05));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .category-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--main);
+    }
+
+    .category-card p {
+      font-size: 13px;
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+
+    .category-count {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* AI相談バナー */
+    .ai-banner {
+      background: linear-gradient(135deg, #5A67D8, #805AD5);
+      border-radius: 16px;
+      padding: 48px;
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      margin: 0 40px;
+      max-width: 1020px;
+      margin: 0 auto;
+    }
+
+    .ai-banner-content {
+      flex: 1;
+    }
+
+    .ai-banner h2 {
+      color: var(--white);
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .ai-banner p {
+      color: #EDF2F7;
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    .ai-features {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .ai-feature {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #EDF2F7;
+      font-size: 13px;
+    }
+
+    .ai-feature-icon {
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    .ai-chat-preview {
+      flex: 0 0 320px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .chat-message {
+      margin-bottom: 12px;
+    }
+
+    .chat-bubble {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      max-width: 85%;
+      line-height: 1.5;
+    }
+
+    .chat-bubble.chat-user {
+      background: #ffffff;
+      color: #2D3748;
+      border-radius: 12px 12px 2px 12px;
+      float: right;
+    }
+
+    .chat-bubble.chat-ai {
+      background: rgba(0,0,0,0.25);
+      color: #ffffff;
+      border-radius: 12px 12px 12px 2px;
+    }
+
+    .chat-label {
+      font-size: 11px;
+      color: #CBD5E0;
+      margin-bottom: 4px;
+    }
+
+    .chat-user .chat-label {
+      text-align: right;
+    }
+
+    .clearfix::after {
+      content: '';
+      display: table;
+      clear: both;
+    }
+
+    /* 新着Q&A */
+    .qa-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .qa-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .qa-card:hover {
+      box-shadow: 0 4px 16px rgba(45,55,72,0.08);
+      border-color: var(--accent);
+    }
+
+    .qa-category-tag {
+      background: rgba(102,126,234,0.1);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .qa-content {
+      flex: 1;
+    }
+
+    .qa-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--main);
+    }
+
+    .qa-excerpt {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .qa-meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    /* フッター */
+    footer {
+      background: var(--main);
+      color: #A0AEC0;
+      padding: 48px 40px 24px;
+      margin-top: 80px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      max-width: 1100px;
+      margin: 0 auto 40px;
+    }
+
+    .footer-brand .logo {
+      font-size: 18px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .footer-brand p {
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .footer-col h4 {
+      color: var(--white);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 8px;
+    }
+
+    .footer-col ul li a {
+      color: #A0AEC0;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--white);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* セクション区切り */
+    .section-divider {
+      background: #EEF2FF;
+      padding: 64px 0;
+    }
+
+    .section-divider-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* ── ハンバーガーメニュー ── */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .nav-mobile {
+      display: none;
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      z-index: 99;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .nav-mobile.open { display: block; }
+    .nav-mobile a {
+      display: block;
+      padding: 14px 0;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 15px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-mobile a:last-child { border-bottom: none; }
+    .nav-mobile a.cta {
+      background: var(--accent);
+      color: var(--white);
+      text-align: center;
+      border-radius: 8px;
+      margin-top: 12px;
+      padding: 14px;
+      font-weight: 600;
+      border: none;
+    }
+
+    /* ── モバイル対応 ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+
+      .hero { padding: 60px 20px; }
+      .hero h1 { font-size: 26px; }
+      .hero p { font-size: 15px; }
+      .hero-buttons { flex-direction: column; align-items: center; gap: 12px; }
+      .btn-primary, .btn-secondary { width: 100%; max-width: 320px; text-align: center; padding: 14px 24px; }
+      .hero-badge { font-size: 12px; }
+
+      .stats-bar {
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        text-align: center;
+      }
+      .stat-number { font-size: 22px; }
+
+      section { padding: 40px 20px; }
+      .section-title { font-size: 22px; margin-bottom: 24px; }
+
+      .category-grid { grid-template-columns: 1fr; gap: 12px; }
+
+      .ai-banner {
+        flex-direction: column;
+        padding: 28px 20px;
+        gap: 24px;
+      }
+      .ai-chat-preview { display: none; }
+      .ai-features { flex-wrap: wrap; gap: 12px; }
+      .ai-banner h2 { font-size: 20px; }
+
+      .section-divider { padding: 40px 0; }
+      .section-divider-inner { padding: 0 20px; }
+
+      .qa-card { flex-direction: column; gap: 10px; }
+
+      footer { padding: 40px 20px 24px; margin-top: 48px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .category-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero h1 { font-size: 34px; }
+      .ai-chat-preview { flex: 0 0 260px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ナビゲーション -->
+  <nav>
+    <div class="logo">よりそい<span>恋愛</span></div>
+    <ul class="nav-links">
+      <li><a href="#">カテゴリ</a></li>
+      <li><a href="qa.html">Q&A</a></li>
+      <li><a href="article-list.html">記事</a></li>
+      <li><a href="chat.html" class="nav-cta">AI相談する</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="nav-mobile" id="navMobile">
+    <a href="#">カテゴリ</a>
+    <a href="#">Q&A</a>
+    <a href="article-list.html">記事</a>
+    <a href="chat.html" class="cta">AI相談する（無料）</a>
+  </div>
+  <script>
+    function toggleMenu() {
+      document.getElementById('hamburger').classList.toggle('open');
+      document.getElementById('navMobile').classList.toggle('open');
+    }
+  </script>
+
+  <!-- ヒーロー -->
+  <div class="hero">
+    <div class="hero-badge">匿名・無料・24時間対応</div>
+    <h1>ひとりで抱え込まないで。<br><span>あなたの悩みに、寄り添います。</span></h1>
+    <p>夫婦・パートナー・個人の性の悩みを、匿名で安心して相談できる場所です。</p>
+    <div class="hero-buttons">
+      <a href="chat.html" class="btn-primary">AIに相談してみる</a>
+      <a href="#" class="btn-secondary">Q&Aを見る</a>
+    </div>
+  </div>
+
+  <!-- 統計バー -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-number">12,400+</span>
+      <span class="stat-label">累計相談件数</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">24h</span>
+      <span class="stat-label">AIが対応</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">完全匿名</span>
+      <span class="stat-label">登録不要で利用可</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">5カテゴリ</span>
+      <span class="stat-label">幅広い悩みに対応</span>
+    </div>
+  </div>
+
+  <!-- カテゴリ -->
+  <section>
+    <div class="section-header">
+      <div class="section-label">CATEGORIES</div>
+      <div class="section-title">どんな悩みですか？</div>
+    </div>
+    <div class="category-grid">
+      <a href="#" class="category-card">
+        <div class="category-icon">💑</div>
+        <h3>夫婦・パートナー関係</h3>
+        <p>レス問題、すれ違い、コミュニケーションの悩みなど</p>
+        <div class="category-count">→ 3,240件の相談</div>
+      </a>
+      <a href="#" class="category-card">
+        <div class="category-icon">🧑</div>
+        <h3>身体の悩み（男性）</h3>
+        <p>ED、早漏、性欲の変化、加齢による変化など</p>
+        <div class="category-count">→ 2,180件の相談</div>
+      </a>
+      <a href="#" class="category-card">
+        <div class="category-icon">👩</div>
+        <h3>身体の悩み（女性）</h3>
+        <p>痛み、感じ方の変化、ホルモンバランス、更年期など</p>
+        <div class="category-count">→ 2,860件の相談</div>
+      </a>
+      <a href="#" class="category-card">
+        <div class="category-icon">🧠</div>
+        <h3>心理・セルフケア</h3>
+        <p>自己肯定感、トラウマ、性に対する不安や罪悪感など</p>
+        <div class="category-count">→ 1,920件の相談</div>
+      </a>
+      <a href="#" class="category-card">
+        <div class="category-icon">📖</div>
+        <h3>性教育・知識</h3>
+        <p>基礎知識、避妊、STI、パートナーへの伝え方など</p>
+        <div class="category-count">→ 1,540件の相談</div>
+      </a>
+      <a href="#" class="category-card">
+        <div class="category-icon">✉️</div>
+        <h3>その他・雑談</h3>
+        <p>カテゴリに当てはまらない悩みもお気軽に</p>
+        <div class="category-count">→ 680件の相談</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- AI相談バナー -->
+  <div class="section-divider">
+    <div class="section-divider-inner">
+      <div class="ai-banner">
+        <div class="ai-banner-content">
+          <h2>AIが24時間、<br>あなたの話を聞きます。</h2>
+          <p>名前も登録も不要。誰にも知られずに、いつでも相談できます。</p>
+          <div class="ai-features">
+            <div class="ai-feature">
+              <span class="ai-feature-icon">✓</span>
+              <span>完全匿名</span>
+            </div>
+            <div class="ai-feature">
+              <span class="ai-feature-icon">✓</span>
+              <span>無料</span>
+            </div>
+            <div class="ai-feature">
+              <span class="ai-feature-icon">✓</span>
+              <span>24時間対応</span>
+            </div>
+            <div class="ai-feature">
+              <span class="ai-feature-icon">✓</span>
+              <span>履歴は残らない</span>
+            </div>
+          </div>
+          <a href="chat.html" class="btn-primary">今すぐ相談する（無料）</a>
+        </div>
+        <div class="ai-chat-preview">
+          <div class="chat-message clearfix">
+            <div class="chat-label">あなた</div>
+            <div class="chat-bubble chat-user" style="display:inline-block; float:right;">夫婦間でレスが続いていて、どう切り出せばいいか悩んでいます。</div>
+          </div>
+          <div class="chat-message" style="margin-top: 16px;">
+            <div class="chat-label">AI</div>
+            <div class="chat-bubble chat-ai">それは悩みますよね。いつ頃からそうなりましたか？きっかけになりそうな出来事はありましたか？</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新着Q&A -->
+  <section>
+    <div class="section-header">
+      <div class="section-label">LATEST Q&A</div>
+      <div class="section-title">新着の相談</div>
+    </div>
+    <div class="qa-list">
+      <a href="#" class="qa-card">
+        <span class="qa-category-tag">夫婦・パートナー</span>
+        <div class="qa-content">
+          <div class="qa-title">40代、結婚10年目でレスになりました。妻への伝え方がわかりません</div>
+          <div class="qa-excerpt">子どもが生まれてから関係が変わり、もう3年になります。話し合いたいのですが...</div>
+          <div class="qa-meta">
+            <span>💬 8件の回答</span>
+            <span>👁 342 views</span>
+            <span>2時間前</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="qa-card">
+        <span class="qa-category-tag">身体の悩み（女性）</span>
+        <div class="qa-content">
+          <div class="qa-title">更年期以降、性欲がなくなったのは普通ですか？</div>
+          <div class="qa-excerpt">50代に入ってから急に変化を感じています。パートナーとの関係にも影響が...</div>
+          <div class="qa-meta">
+            <span>💬 12件の回答</span>
+            <span>👁 518 views</span>
+            <span>5時間前</span>
+          </div>
+        </div>
+      </a>
+      <a href="#" class="qa-card">
+        <span class="qa-category-tag">心理・セルフケア</span>
+        <div class="qa-content">
+          <div class="qa-title">性について考えること自体に罪悪感があります</div>
+          <div class="qa-excerpt">子どもの頃の環境からか、性に関してオープンに話せず、自分でも...</div>
+          <div class="qa-meta">
+            <span>💬 6件の回答</span>
+            <span>👁 287 views</span>
+            <span>1日前</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="logo">よりそい<span>恋愛</span></span>
+        <p>夫婦・パートナー・個人の性の悩みを<br>匿名で安心して相談できる場所です。</p>
+      </div>
+      <div class="footer-col">
+        <h4>カテゴリ</h4>
+        <ul>
+          <li><a href="#">夫婦・パートナー</a></li>
+          <li><a href="#">身体の悩み（男性）</a></li>
+          <li><a href="#">身体の悩み（女性）</a></li>
+          <li><a href="#">心理・セルフケア</a></li>
+          <li><a href="#">性教育・知識</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>サービス</h4>
+        <ul>
+          <li><a href="#">AI相談</a></li>
+          <li><a href="#">Q&A掲示板</a></li>
+          <li><a href="#">記事一覧</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>サイト情報</h4>
+        <ul>
+          <li><a href="#">このサイトについて</a></li>
+          <li><a href="privacy.html">プライバシーポリシー</a></li>
+          <li><a href="#">免責事項</a></li>
+          <li><a href="#">お問い合わせ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 よりそい恋愛. All rights reserved. ｜ 本サイトは医療アドバイスを提供するものではありません。</p>
+    </div>
+  </footer>
+
+</body>
+</html>

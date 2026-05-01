@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>記事一覧 | TalkSpace</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --accent: #7C8CF8;
+      --bg: #F0F4FF;
+      --white: #FFFFFF;
+      --text: #2D3748;
+      --text-light: #718096;
+      --border: #E2E8F0;
+    }
+    body { font-family:'Hiragino Sans','Yu Gothic',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+    nav { background:var(--white); border-bottom:1px solid var(--border); padding:0 40px; height:64px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .logo { font-size:20px; font-weight:700; color:var(--text); text-decoration:none; }
+    .logo span { color:var(--accent); }
+    nav a.nav-link { color:var(--text-light); text-decoration:none; font-size:14px; }
+
+    .container { max-width:1100px; margin:0 auto; padding:48px 40px; }
+    .page-header { margin-bottom:40px; }
+    .page-title { font-size:28px; font-weight:700; color:var(--text); margin-bottom:8px; }
+    .page-sub { color:var(--text-light); font-size:15px; }
+
+    /* フィルター */
+    .filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:32px; }
+    .filter-btn {
+      padding:8px 20px; border-radius:20px; border:1px solid var(--border);
+      background:var(--white); color:var(--text-light); font-size:13px; cursor:pointer;
+      transition:all 0.2s; font-family:inherit;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background:var(--accent); color:var(--white); border-color:var(--accent);
+    }
+
+    /* 記事グリッド */
+    .article-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+
+    .article-card {
+      background:var(--white); border:1px solid var(--border); border-radius:12px;
+      padding:24px; text-decoration:none; color:inherit; display:block;
+      transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .article-card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(45,55,72,0.1); border-color:var(--accent); }
+
+    .cat-tag { display:inline-block; font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; margin-bottom:12px; }
+    .cat-couple    { background:#667EEA1a; color:#667EEA; }
+    .cat-male      { background:#4299E11a; color:#4299E1; }
+    .cat-female    { background:#ED64A61a; color:#ED64A6; }
+    .cat-mental    { background:#9F7AEA1a; color:#9F7AEA; }
+    .cat-education { background:#48BB781a; color:#48BB78; }
+
+    .article-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:8px; line-height:1.5; }
+    .article-keyword { font-size:12px; color:var(--text-light); }
+    .article-date { font-size:11px; color:#A0AEC0; margin-top:12px; }
+
+    /* 空状態 */
+    .empty-state { text-align:center; padding:80px 20px; }
+    .empty-state h3 { font-size:20px; color:var(--text-light); margin-bottom:8px; }
+    .empty-state p { font-size:14px; color:#A0AEC0; }
+    .empty-icon { font-size:48px; margin-bottom:16px; }
+
+    footer { text-align:center; padding:48px; color:#A0AEC0; font-size:13px; margin-top:48px; background:var(--white); border-top:1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Talk<span>Space</span></a>
+  <a href="index.html" class="nav-link">← トップ</a>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">記事一覧</h1>
+    <p class="page-sub">性・健康・関係性に関する記事をカテゴリ別に読めます</p>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterArticles('all', this)">すべて</button>
+    <button class="filter-btn" onclick="filterArticles('couple', this)">夫婦・パートナー</button>
+    <button class="filter-btn" onclick="filterArticles('male', this)">身体の悩み（男性）</button>
+    <button class="filter-btn" onclick="filterArticles('female', this)">身体の悩み（女性）</button>
+    <button class="filter-btn" onclick="filterArticles('mental', this)">心理・セルフケア</button>
+    <button class="filter-btn" onclick="filterArticles('education', this)">性教育・知識</button>
+  </div>
+
+  <div class="article-grid" id="articleGrid">
+    <div class="empty-state" id="emptyState" style="grid-column:1/-1; display:none;">
+      <div class="empty-icon">📝</div>
+      <h3>記事を生成中です</h3>
+      <p>generate_articles.py を実行すると記事が追加されます</p>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 TalkSpace. All rights reserved.</footer>
+
+<script>
+  let allArticles = [];
+  let currentFilter = 'all';
+
+  const catLabels = {
+    couple:    { label: '夫婦・パートナー関係', cls: 'cat-couple' },
+    male:      { label: '身体の悩み（男性）',   cls: 'cat-male' },
+    female:    { label: '身体の悩み（女性）',   cls: 'cat-female' },
+    mental:    { label: '心理・セルフケア',      cls: 'cat-mental' },
+    education: { label: '性教育・知識',          cls: 'cat-education' },
+  };
+
+  function formatDate(isoStr) {
+    const d = new Date(isoStr);
+    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+  }
+
+  function renderArticles(articles) {
+    const grid = document.getElementById('articleGrid');
+    const empty = document.getElementById('emptyState');
+
+    if (articles.length === 0) {
+      grid.innerHTML = '';
+      grid.appendChild(empty);
+      empty.style.display = 'block';
+      return;
+    }
+
+    empty.style.display = 'none';
+    grid.innerHTML = articles.map(a => {
+      const cat = catLabels[a.category] || { label: a.cat_label, cls: 'cat-couple' };
+      return `
+        <a href="${a.file}" class="article-card" data-cat="${a.category}">
+          <span class="cat-tag ${cat.cls}">${cat.label}</span>
+          <div class="article-title">${a.title}</div>
+          <div class="article-keyword">🔍 ${a.keyword}</div>
+          <div class="article-date">${formatDate(a.created_at)}</div>
+        </a>`;
+    }).join('');
+  }
+
+  function filterArticles(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filtered = cat === 'all' ? allArticles : allArticles.filter(a => a.category === cat);
+    renderArticles(filtered);
+  }
+
+  // インデックスJSONを読み込む
+  fetch('articles_index.json')
+    .then(r => r.json())
+    .then(data => {
+      allArticles = data;
+      renderArticles(data);
+    })
+    .catch(() => {
+      // JSONがない場合は空表示
+      renderArticles([]);
+      document.getElementById('emptyState').style.display = 'block';
+    });
+</script>
+
+</body>
+</html>

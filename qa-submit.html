@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>相談を投稿する | TalkSpace</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root { --accent:#7C8CF8; --bg:#F0F4FF; --white:#fff; --text:#2D3748; --text-light:#718096; --border:#E2E8F0; }
+    body { font-family:'Hiragino Sans','Yu Gothic',sans-serif; background:var(--bg); color:var(--text); }
+    nav { background:var(--white); border-bottom:1px solid var(--border); padding:0 24px; height:56px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    .logo { font-size:18px; font-weight:700; color:var(--text); text-decoration:none; }
+    .logo span { color:var(--accent); }
+    .back-link { color:var(--accent); text-decoration:none; font-size:14px; }
+
+    .container { max-width:680px; margin:48px auto; padding:0 24px; }
+    .page-header { margin-bottom:32px; }
+    .page-title { font-size:26px; font-weight:700; margin-bottom:8px; }
+    .page-sub { color:var(--text-light); font-size:14px; }
+
+    .anon-note { background:rgba(124,140,248,0.08); border:1px solid rgba(124,140,248,0.2); border-radius:12px; padding:16px 20px; margin-bottom:32px; display:flex; gap:12px; align-items:flex-start; }
+    .anon-note-icon { font-size:20px; flex-shrink:0; }
+    .anon-note p { font-size:13px; color:var(--text-light); line-height:1.7; }
+
+    .form-card { background:var(--white); border:1px solid var(--border); border-radius:16px; padding:32px; }
+    .form-group { margin-bottom:24px; }
+    label { display:block; font-size:14px; font-weight:600; margin-bottom:8px; color:var(--text); }
+    .required { color:var(--accent); margin-left:4px; }
+    select, input[type="text"], textarea {
+      width:100%; padding:12px 16px; border:1px solid var(--border); border-radius:10px;
+      font-family:inherit; font-size:14px; color:var(--text); background:var(--bg);
+      transition:border-color 0.2s; outline:none;
+    }
+    select:focus, input[type="text"]:focus, textarea:focus { border-color:var(--accent); background:var(--white); }
+    textarea { resize:vertical; min-height:120px; line-height:1.7; }
+    .char-count { text-align:right; font-size:12px; color:var(--text-light); margin-top:4px; }
+
+    .submit-btn {
+      width:100%; padding:16px; background:var(--accent); color:var(--white);
+      border:none; border-radius:10px; font-size:16px; font-weight:600;
+      cursor:pointer; transition:opacity 0.2s; font-family:inherit;
+    }
+    .submit-btn:hover { opacity:0.9; }
+
+    .success-msg { display:none; text-align:center; padding:48px 24px; }
+    .success-icon { font-size:56px; margin-bottom:16px; }
+    .success-msg h3 { font-size:22px; font-weight:700; margin-bottom:8px; }
+    .success-msg p { color:var(--text-light); font-size:14px; margin-bottom:24px; }
+    .back-btn { display:inline-block; padding:12px 32px; background:var(--accent); color:var(--white); border-radius:8px; text-decoration:none; font-weight:600; }
+
+    .disclaimer { font-size:12px; color:var(--text-light); text-align:center; margin-top:16px; line-height:1.7; }
+
+    @media (max-width:768px) { .container { margin:24px auto; } .form-card { padding:20px; } }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Talk<span>Space</span></a>
+  <a href="qa.html" class="back-link">← Q&A一覧</a>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">相談を投稿する</h1>
+    <p class="page-sub">匿名で投稿できます。個人情報は一切不要です。</p>
+  </div>
+
+  <div class="anon-note">
+    <div class="anon-note-icon">🔒</div>
+    <p>投稿は匿名です。名前・メールアドレスは不要です。投稿内容は管理者が確認後に公開されます。不適切な内容は非公開とする場合があります。</p>
+  </div>
+
+  <div class="form-card">
+    <form id="qaForm" name="qa-submission" netlify netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="qa-submission">
+      <p style="display:none"><input name="bot-field"></p>
+
+      <div class="form-group">
+        <label>カテゴリ<span class="required">*</span></label>
+        <select name="category" required>
+          <option value="">選択してください</option>
+          <option value="夫婦・パートナー関係">夫婦・パートナー関係</option>
+          <option value="身体の悩み（男性）">身体の悩み（男性）</option>
+          <option value="身体の悩み（女性）">身体の悩み（女性）</option>
+          <option value="心理・セルフケア">心理・セルフケア</option>
+          <option value="性教育・知識">性教育・知識</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>悩みのタイトル<span class="required">*</span></label>
+        <input type="text" name="title" placeholder="例：夫婦でレスが続いています" maxlength="60" required oninput="updateCount(this,'titleCount')">
+        <div class="char-count"><span id="titleCount">0</span>/60文字</div>
+      </div>
+
+      <div class="form-group">
+        <label>詳しい内容</label>
+        <textarea name="detail" placeholder="状況を詳しく書くと、より的確な回答が得られます（任意）" maxlength="500" oninput="updateCount(this,'detailCount')"></textarea>
+        <div class="char-count"><span id="detailCount">0</span>/500文字</div>
+      </div>
+
+      <button type="submit" class="submit-btn">匿名で投稿する</button>
+      <p class="disclaimer">投稿することで<a href="#" style="color:var(--accent)">利用規約</a>に同意したものとみなします。<br>医療・法律的なアドバイスはできません。</p>
+    </form>
+
+    <div class="success-msg" id="successMsg">
+      <div class="success-icon">✅</div>
+      <h3>投稿を受け付けました</h3>
+      <p>管理者が確認後、Q&A一覧に掲載されます。<br>通常1〜3日以内に公開されます。</p>
+      <a href="qa.html" class="back-btn">Q&A一覧を見る</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function updateCount(el, countId) {
+    document.getElementById(countId).textContent = el.value.length;
+  }
+
+  document.getElementById('qaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = this;
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(new FormData(form)).toString()
+    })
+    .then(() => {
+      form.style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    })
+    .catch(() => {
+      form.style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI相談 | TalkSpace</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --accent: #7C8CF8;
+      --accent2: #805AD5;
+      --bg: #F0F4FF;
+      --white: #FFFFFF;
+      --text: #2D3748;
+      --text-light: #718096;
+      --border: #E2E8F0;
+    }
+    body { font-family:'Hiragino Sans','Yu Gothic',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
+
+    /* ナビ */
+    nav { background:var(--white); border-bottom:1px solid var(--border); padding:0 24px; height:56px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .logo { font-size:18px; font-weight:700; color:var(--text); text-decoration:none; }
+    .logo span { color:var(--accent); }
+    .nav-badge { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; }
+
+    /* レイアウト */
+    .layout { display:flex; flex:1; overflow:hidden; max-width:1100px; width:100%; margin:0 auto; padding:16px; gap:16px; }
+
+    /* チャットエリア */
+    .chat-area { flex:1; display:flex; flex-direction:column; background:var(--white); border-radius:16px; border:1px solid var(--border); overflow:hidden; }
+
+    .chat-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+    .ai-avatar { width:40px; height:40px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .ai-info h3 { font-size:15px; font-weight:700; }
+    .ai-info p { font-size:12px; color:var(--text-light); }
+    .online-dot { width:8px; height:8px; background:#48BB78; border-radius:50%; display:inline-block; margin-right:4px; }
+
+    /* メッセージ */
+    .messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+
+    .msg { display:flex; gap:10px; max-width:85%; }
+    .msg.user { align-self:flex-end; flex-direction:row-reverse; }
+
+    .msg-avatar { width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; }
+    .msg.ai .msg-avatar { background:linear-gradient(135deg,var(--accent),var(--accent2)); }
+    .msg.user .msg-avatar { background:#E2E8F0; }
+
+    .msg-body { display:flex; flex-direction:column; gap:4px; }
+    .msg.user .msg-body { align-items:flex-end; }
+
+    .bubble { padding:12px 16px; border-radius:16px; font-size:14px; line-height:1.7; }
+    .msg.ai .bubble { background:var(--bg); border-radius:4px 16px 16px 16px; color:var(--text); }
+    .msg.user .bubble { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; border-radius:16px 4px 16px 16px; }
+
+    .msg-time { font-size:11px; color:#A0AEC0; }
+
+    /* タイピング */
+    .typing .bubble { background:var(--bg); padding:14px 18px; }
+    .typing-dots { display:flex; gap:4px; align-items:center; }
+    .typing-dots span { width:7px; height:7px; background:var(--text-light); border-radius:50%; animation:bounce 1.2s infinite; }
+    .typing-dots span:nth-child(2) { animation-delay:0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay:0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+    /* アフィリエイトカード */
+    .affiliate-card {
+      border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+      background:var(--white); margin-top:8px; text-decoration:none; color:inherit;
+      display:flex; align-items:center; gap:12px;
+      transition:box-shadow 0.2s, border-color 0.2s;
+      position:relative;
+    }
+    .affiliate-card:hover { box-shadow:0 4px 16px rgba(124,140,248,0.15); border-color:var(--accent); }
+    .affiliate-icon { font-size:28px; flex-shrink:0; }
+    .affiliate-info { flex:1; }
+    .pr-badge { position:absolute; top:8px; right:8px; background:#718096; color:#fff; font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; letter-spacing:0.5px; }
+    .affiliate-label { font-size:10px; color:var(--accent); font-weight:600; margin-bottom:2px; }
+    .affiliate-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:2px; }
+    .affiliate-desc { font-size:11px; color:var(--text-light); }
+    .affiliate-arrow { color:var(--accent); font-size:18px; }
+
+    /* LINEバナー */
+    .line-banner {
+      background:linear-gradient(135deg,#06C755,#00A041);
+      border-radius:12px; padding:14px 16px; margin-top:8px;
+      display:flex; align-items:center; gap:12px; cursor:pointer;
+      text-decoration:none;
+    }
+    .line-banner-text h4 { color:#fff; font-size:13px; font-weight:700; margin-bottom:2px; }
+    .line-banner-text p { color:rgba(255,255,255,0.85); font-size:11px; }
+    .line-icon { font-size:28px; }
+
+    /* 入力エリア */
+    .input-area { padding:16px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:flex-end; }
+    .input-wrap { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:10px 14px; display:flex; align-items:center; gap:8px; transition:border-color 0.2s; }
+    .input-wrap:focus-within { border-color:var(--accent); }
+    textarea { flex:1; background:none; border:none; outline:none; font-family:inherit; font-size:14px; color:var(--text); resize:none; max-height:100px; line-height:1.5; }
+    textarea::placeholder { color:#A0AEC0; }
+    .send-btn { width:40px; height:40px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:opacity 0.2s; flex-shrink:0; }
+    .send-btn:hover { opacity:0.9; }
+    .send-btn svg { width:18px; height:18px; fill:#fff; }
+
+    /* サイドパネル */
+    .side-panel { width:280px; display:flex; flex-direction:column; gap:12px; flex-shrink:0; }
+
+    .panel-card { background:var(--white); border:1px solid var(--border); border-radius:16px; padding:20px; }
+    .panel-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+
+    .topic-btn { width:100%; text-align:left; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:13px; color:var(--text); cursor:pointer; margin-bottom:6px; transition:all 0.2s; font-family:inherit; }
+    .topic-btn:last-child { margin-bottom:0; }
+    .topic-btn:hover { background:#EEF2FF; border-color:var(--accent); color:var(--accent); }
+
+    .anon-note { font-size:12px; color:var(--text-light); line-height:1.7; }
+    .anon-note li { margin-left:16px; margin-bottom:4px; }
+
+    @media (max-width: 768px) {
+      .side-panel { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Talk<span>Space</span></a>
+  <span class="nav-badge">AI相談 無料・匿名</span>
+</nav>
+
+<div class="layout">
+
+  <!-- チャットメイン -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <div class="ai-avatar">🤖</div>
+      <div class="ai-info">
+        <h3>TalkSpace AI</h3>
+        <p><span class="online-dot"></span>オンライン・24時間対応</p>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <!-- 初期メッセージ -->
+      <div class="msg ai">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-body">
+          <div class="bubble">
+            こんにちは。TalkSpace AIです。<br>
+            性・夫婦・パートナーシップに関するお悩みを、匿名で安心してお話しください。<br><br>
+            どんな小さなことでも、気軽に話しかけてみてください。
+          </div>
+          <div class="msg-time">今</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="userInput" placeholder="悩みを入力してください（匿名・無料）" rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"
+          autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+      </div>
+      <button class="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- サイドパネル -->
+  <div class="side-panel">
+    <div class="panel-card">
+      <div class="panel-title">💬 よくある相談</div>
+      <button class="topic-btn" onclick="setTopic('夫婦間でレスが続いています')">夫婦のレス問題</button>
+      <button class="topic-btn" onclick="setTopic('EDに悩んでいます')">EDの悩み（男性）</button>
+      <button class="topic-btn" onclick="setTopic('性交痛があって辛いです')">性交痛の悩み（女性）</button>
+      <button class="topic-btn" onclick="setTopic('性欲が低下していて心配です')">性欲の低下</button>
+      <button class="topic-btn" onclick="setTopic('性のことを話すのが恥ずかしくて悩んでいます')">心理的な悩み</button>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">🔒 プライバシーについて</div>
+      <ul class="anon-note">
+        <li>名前・メール不要</li>
+        <li>会話履歴は保存しない</li>
+        <li>IPアドレスは記録しない</li>
+        <li>いつでも会話を終了できる</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── アフィリエイト商品データ ────────────────────
+  const affiliates = {
+    couple: [
+      { icon:'📚', label:'書籍アフィリエイト', name:'夫婦の対話術（Amazon）', desc:'夫婦間のコミュニケーション改善に', url:'#' },
+      { icon:'💬', label:'カウンセリング紹介', name:'オンラインカウンセリング cotree', desc:'専門家に相談・初回無料', url:'#' },
+    ],
+    male: [
+      { icon:'💊', label:'サプリアフィリエイト', name:'男性活力サポートサプリ', desc:'ED・活力低下に。定期購入で20%OFF', url:'#' },
+      { icon:'🏥', label:'クリニック紹介', name:'男性専門クリニック（無料相談）', desc:'泌尿器科・ED専門、オンライン診療可', url:'#' },
+    ],
+    female: [
+      { icon:'🌸', label:'サプリアフィリエイト', name:'女性ホルモンバランスサプリ', desc:'更年期・乾燥・性欲低下に', url:'#' },
+      { icon:'🏥', label:'クリニック紹介', name:'女性専門クリニック（無料相談）', desc:'婦人科・性交痛・更年期専門', url:'#' },
+    ],
+    mental: [
+      { icon:'📖', label:'書籍アフィリエイト', name:'自己肯定感を高める本（Amazon）', desc:'性と心理の関係を優しく解説', url:'#' },
+      { icon:'💬', label:'カウンセリング紹介', name:'Unlace（テキストカウンセリング）', desc:'チャット形式で話しやすい', url:'#' },
+    ],
+    education: [
+      { icon:'📚', label:'書籍アフィリエイト', name:'性教育の教科書（Amazon）', desc:'正しい知識を身につける', url:'#' },
+    ],
+  };
+
+  // ── 返答ルール ───────────────────────────────
+  const rules = [
+    {
+      keywords: ['レス','性交渉','セックスレス','夫婦','パートナー','関係'],
+      category: 'couple',
+      responses: [
+        'レス問題は多くのご夫婦が抱える悩みです。いつ頃からそうなりましたか？きっかけになった出来事はありましたか？',
+        'お気持ち、よくわかります。相手との距離感が変わってしまうのはつらいですよね。パートナーさんとは普段の会話はできていますか？',
+        '夫婦間のレスには、ホルモンバランスや疲労、心理的な距離感など様々な原因があります。どちらが先に変化を感じましたか？',
+      ],
+      article: { text:'夫婦のレス問題について詳しく読む', url:'articles/couple-001.html' },
+    },
+    {
+      keywords: ['ED','勃起','立たない','男性','精力'],
+      category: 'male',
+      responses: [
+        'EDは40代以降の男性にとても多い悩みです。恥ずかしいことでは全くありません。いつ頃から気になり始めましたか？',
+        'ストレスや疲労、生活習慣もEDに大きく影響します。最近、睡眠や食事など生活面で気になることはありますか？',
+        'EDには心理的な要因と身体的な要因があります。パートナーとの関係でプレッシャーを感じることはありますか？',
+      ],
+      article: { text:'EDの原因と改善方法を読む', url:'articles/male-005.html' },
+    },
+    {
+      keywords: ['性交痛','痛い','痛み','乾燥','女性','潤い'],
+      category: 'female',
+      responses: [
+        '性交痛はとても辛いですね。痛みはどんな時に感じますか？また、いつ頃から始まりましたか？',
+        '更年期前後の女性に多い症状です。ホルモンバランスの変化が大きく関係していることがあります。年齢はどのくらいですか？',
+        '性交痛は我慢しないことが大切です。原因によってケア方法が異なります。婦人科への相談も選択肢のひとつです。',
+      ],
+      article: { text:'性交痛の原因と対処法を読む', url:'articles/female-008.html' },
+    },
+    {
+      keywords: ['性欲','欲求','低下','なくなった','興味'],
+      category: 'female',
+      responses: [
+        '性欲の低下は多くの方が経験することです。最近、ストレスや疲れを強く感じることはありますか？',
+        'ホルモンバランス、睡眠不足、精神的な疲労など様々な原因が考えられます。生活リズムに変化はありましたか？',
+        '性欲の低下はパートナーとの関係にも影響しますよね。相手には話せていますか？',
+      ],
+      article: { text:'性欲低下の原因と対策を読む', url:'articles/female-009.html' },
+    },
+    {
+      keywords: ['恥ずかしい','罪悪感','話せない','怖い','不安','トラウマ'],
+      category: 'mental',
+      responses: [
+        '性について話すことに抵抗を感じるのは、育ってきた環境や経験が影響していることが多いです。どんな場面で特に感じますか？',
+        'その気持ち、とても自然なことです。日本では性についてオープンに話せる環境が少ないですよね。いつ頃からそう感じていますか？',
+        '罪悪感は、幼少期に受けた教育や周囲の価値観から来ていることがほとんどです。あなたは何も悪くありません。',
+      ],
+      article: { text:'性と罪悪感の関係を読む', url:'articles/mental-011.html' },
+    },
+    {
+      keywords: ['避妊','コンドーム','ピル','妊娠'],
+      category: 'education',
+      responses: [
+        '避妊方法にはいくつかの選択肢があります。どんな方法を今お使いですか、またはどれを検討していますか？',
+        '確実性や身体への影響など、生活スタイルに合わせて選ぶことが大切です。具体的に気になっている方法はありますか？',
+      ],
+      article: { text:'避妊方法の種類と比較を読む', url:'articles/education-014.html' },
+    },
+  ];
+
+  const defaultResponses = [
+    'もう少し詳しく教えていただけますか？どんな場面で悩みを感じますか？',
+    'それは辛いですね。いつ頃からそのように感じていますか？',
+    'お話を聞かせてください。その悩みは、パートナーや家族との関係に影響していますか？',
+    'なるほど。その悩みを誰かに話したことはありますか？',
+  ];
+
+  let messageCount = 0;
+  let shownLine = false;
+
+  function getTime() {
+    return new Date().toLocaleTimeString('ja-JP', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function addMessage(role, text, extras = null) {
+    const messages = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+
+    let extrasHtml = '';
+    if (extras) {
+      if (extras.affiliates) {
+        extrasHtml += extras.affiliates.map(a => `
+          <a href="${a.url}" class="affiliate-card" target="_blank" rel="noopener">
+            <span class="pr-badge">PR</span>
+            <div class="affiliate-icon">${a.icon}</div>
+            <div class="affiliate-info">
+              <div class="affiliate-label">${a.label}</div>
+              <div class="affiliate-name">${a.name}</div>
+              <div class="affiliate-desc">${a.desc}</div>
+            </div>
+            <div class="affiliate-arrow">›</div>
+          </a>`).join('');
+      }
+      if (extras.article) {
+        extrasHtml += `<a href="${extras.article.url}" class="affiliate-card" style="margin-top:8px;">
+          <div class="affiliate-icon">📄</div>
+          <div class="affiliate-info">
+            <div class="affiliate-label">関連記事</div>
+            <div class="affiliate-name">${extras.article.text}</div>
+          </div>
+          <div class="affiliate-arrow">›</div>
+        </a>`;
+      }
+      if (extras.line) {
+        extrasHtml += `<a href="#" class="line-banner">
+          <div class="line-icon">💬</div>
+          <div class="line-banner-text">
+            <h4>LINEで続きを相談する</h4>
+            <p>週1回、役立つ情報もお届けします</p>
+          </div>
+        </a>`;
+      }
+    }
+
+    div.innerHTML = `
+      <div class="msg-avatar">${role === 'ai' ? '🤖' : '👤'}</div>
+      <div class="msg-body">
+        <div class="bubble">${text}</div>
+        ${extrasHtml}
+        <div class="msg-time">${getTime()}</div>
+      </div>`;
+
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function showTyping() {
+    const messages = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'msg ai typing';
+    div.id = 'typing';
+    div.innerHTML = `
+      <div class="msg-avatar">🤖</div>
+      <div class="msg-body">
+        <div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+      </div>`;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  function detectRule(text) {
+    for (const rule of rules) {
+      if (rule.keywords.some(k => text.includes(k))) return rule;
+    }
+    return null;
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage('user', text);
+    input.value = '';
+    input.style.height = 'auto';
+    messageCount++;
+
+    showTyping();
+
+    setTimeout(() => {
+      removeTyping();
+
+      const rule = detectRule(text);
+      let response, extras = {};
+
+      if (rule) {
+        response = rule.responses[Math.floor(Math.random() * rule.responses.length)];
+        // 2回目以降のメッセージでアフィリエイト表示
+        if (messageCount >= 2) {
+          extras.affiliates = affiliates[rule.category] || [];
+          extras.article = rule.article;
+        }
+      } else {
+        response = defaultResponses[Math.min(messageCount - 1, defaultResponses.length - 1)];
+      }
+
+      // 3回目以降にLINE誘導（1回だけ）
+      if (messageCount >= 3 && !shownLine) {
+        extras.line = true;
+        shownLine = true;
+      }
+
+      addMessage('ai', response, Object.keys(extras).length ? extras : null);
+
+    }, 1000 + Math.random() * 800);
+  }
+
+  let isComposing = false;
+  document.getElementById('userInput').addEventListener('compositionstart', () => isComposing = true);
+  document.getElementById('userInput').addEventListener('compositionend', () => isComposing = false);
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  }
+
+  function setTopic(text) {
+    document.getElementById('userInput').value = text;
+    document.getElementById('userInput').focus();
+  }
+</script>
+
+</body>
+</html>
