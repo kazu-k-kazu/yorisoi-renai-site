@@ -118,16 +118,12 @@
 
   function renderArticles(articles) {
     const grid = document.getElementById('articleGrid');
-    const empty = document.getElementById('emptyState');
 
     if (articles.length === 0) {
-      grid.innerHTML = '';
-      grid.appendChild(empty);
-      empty.style.display = 'block';
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:80px 20px;"><div style="font-size:48px;margin-bottom:16px;">📝</div><h3 style="color:#718096;">該当する記事がありません</h3></div>';
       return;
     }
 
-    empty.style.display = 'none';
     grid.innerHTML = articles.map(a => {
       const cat = catLabels[a.category] || { label: a.cat_label, cls: 'cat-couple' };
       return `
